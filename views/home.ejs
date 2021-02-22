@@ -1,0 +1,223 @@
+<!-- Main content -->
+<section class="content" id="chart">
+    <div class="row">
+		<div class="col-md-12">
+			<div class="box box-solid">
+				<div class="box-header">
+					<h3 class="box-title">Grafik 1</h3>
+                </div>
+                <div class="box-body text-center">
+					<div id="chart1"></div>
+				</div>
+            </div>
+        </div>    
+    </div>
+	<div class="row">
+		<div class="col-md-6">
+			<div class="box box-solid">
+				<div class="box-header">
+					<h3 class="box-title">Grafik 2</h3>
+				</div>
+				<div class="box-body text-center">
+					<div id="chart2"></div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="box box-solid">
+				<div class="box-header">
+					<h3 class="box-title">Grafik 3</h3>
+				</div>
+				<div class="box-body text-center">
+					<div id="chart3"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<script>
+var chart = new Vue({
+	el: '#lists',
+	data: {
+		chart3: [],
+		chart2: [],
+		perHari: [],
+		jumlah: []
+	},
+	methods: {
+		getData() {
+			let vm = this;
+			axios.get('/jumlah').then((res) => {
+				vm.perHari = res.data.perHari;
+				vm.jumlah = res.data.jumlah;
+				vm.Chart1(vm.perHari, vm.jumlah);
+			});
+			axios.get('/usia').then((res) => {
+				vm.chart2 = res.data.data;
+				vm.Chart2(vm.chart2);
+			});
+			axios.get('/keterangan').then((res) => {
+				vm.chart3 = res.data.data;
+				vm.Chart3(vm.chart3);
+			});
+		},
+		Chart1(perHari,jumlah) {
+			let vm = this, series = [], hari = [];
+			_.forEach(jumlah, (o) => {
+				series.push(o.pasien);
+			})
+			_.forEach(perHari, (o) => {
+				hari.push(vm.tanggal(o.tanggal));
+			})
+			Highcharts.chart('chart1', {
+				title: {
+					text: 'Jumlah Pasien Per Hari'
+				},
+
+				yAxis: {
+					min: 0,
+					title: {
+						text: 'Jumlah Pasien'
+					}
+				},
+
+				xAxis: {
+					categories: hari
+				},
+
+				legend: {
+					layout: 'vertical',
+					align: 'right',
+					verticalAlign: 'middle'
+				},
+
+				plotOptions: {
+					series: {
+						label: {
+							connectorAllowed: false
+						}
+					}
+				},
+
+				series: [{
+					name: 'Series',
+					data: series
+				}],
+
+				responsive: {
+					rules: [{
+						condition: {
+							maxWidth: 500
+						},
+						chartOptions: {
+							legend: {
+								layout: 'horizontal',
+								align: 'center',
+								verticalAlign: 'bottom'
+							}
+						}
+					}]
+				},
+
+				credits: {
+					text: "Bee Solutions Partner"
+				}
+			});
+		},
+		tanggal(t) {
+			return moment(t).format('DD/MM/YYYY');
+		},
+		Chart2(data) { 
+			Highcharts.chart('chart2', {
+				chart: {
+					plotBackgroundColor: null,
+					plotBorderWidth: null,
+					plotShadow: false,
+					type: 'pie'
+				},
+				title: {
+					text: 'Jumlah Pasien Positif Berdasarkan Kelompok Umur'
+				},
+				tooltip: {
+					pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+				},
+				accessibility: {
+					point: {
+						valueSuffix: '%'
+					}
+				},
+				legend: {
+					layout: 'vertical',
+					align: 'right',
+					verticalAlign: 'middle'
+				},
+				plotOptions: {
+					pie: {
+						allowPointSelect: true,
+						cursor: 'pointer',
+						dataLabels: {
+							enabled: false
+						},
+						showInLegend: true
+					}
+				},
+				series: [{
+					name: 'Usia',
+					colorByPoint: true,
+					data: data
+				}],
+				credits: {
+					text: "Bee Solutions Partner"
+				}
+			});
+		},
+		Chart3(data) {
+    	Highcharts.chart('chart3', {
+        chart: {
+					plotBackgroundColor: null,
+					plotBorderWidth: null,
+					plotShadow: false,
+					type: 'pie'
+        },
+        title: {
+          text: 'Jumlah Pasien Positif yang sedang, dirawat, sembuh, dan meninggal'
+        },
+        tooltip: {
+          pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        accessibility: {
+					point: {
+						valueSuffix: '%'
+					}
+        },        
+        legend: {
+					layout: 'vertical',
+					align: 'right',
+					verticalAlign: 'middle'
+        },
+        plotOptions: {
+					pie: {
+						allowPointSelect: true,
+						cursor: 'pointer',
+						dataLabels: {
+							enabled: false
+						},
+						showInLegend: true
+					}
+        },
+        series: [{
+					name: 'Data',
+					colorByPoint: true,
+					data: data
+        }],
+        credits: {
+          text: "Bee Solutions Partner"
+        }
+			});
+		}
+	},
+	mounted() {
+		this.getData();
+	}
+})
+</script>
